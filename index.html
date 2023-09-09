@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Form</title>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                sourceAgentId: formData.get('agentId'),
+                amount: parseFloat(formData.get('amount')),
+                destinationWalletId: formData.get('destinationWalletId'),
+                pin: formData.get('pin'),
+                otp: formData.get('otp')
+            };
+            try {
+                const response = await fetch('http://localhost:3000/api/transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                document.getElementById('responseMessage').textContent = result.message;
+                if (result.transaction) {
+    const transactionDetails = `
+        Transaction Details:
+        Agent ID: ${result.transaction.sourceAgentId}
+        Amount: $${result.transaction.amount}
+        Destination Wallet ID: ${result.transaction.destinationWalletId}
+        Date: ${new Date(result.transaction.date).toLocaleString()}
+    `;
+    document.getElementById('responseMessage').textContent += "\n\n" + transactionDetails;
+}
+            } catch (error) {
+                console.error("Error sending the transaction:", error);
+                document.getElementById('responseMessage').textContent = "Error sending the transaction.";
+            }
+        }
+    </script>
+</head>
+<body>
+    <form onsubmit="submitForm(event)">
+        <label for="agentId">Agent ID (12 characters):</label>
+        <input type="text" id="agentId" name="agentId" required minlength="12" maxlength="12"><br><br>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required><br><br>
+
+        <label for="destinationWalletId">Destination Wallet ID:</label>
+        <input type="text" id="destinationWalletId" name="destinationWalletId" required><br><br>
+
+        <label for="pin">PIN (4 digits):</label>
+        <input type="password" id="pin" name="pin" required minlength="4" maxlength="4"><br><br>
+
+        <label for="otp">OTP:</label>
+        <input type="text" id="otp" name="otp" required><br><br>
+
+        <input type="submit" value="Submit Transaction">
+    </form>
+
+    <div id="responseMessage" style="margin-top: 20px; font-weight: bold;"></div>
+</body>
+</html>
