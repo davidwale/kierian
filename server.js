@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 const port = 3000;
 
-// Database setup
+// sqlite Database setup for demonstration
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: './database.sqlite'
